@@ -7,38 +7,49 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
+const DEFAULT_FILENAME = "problems.csv"
+const DEFAULT_LIMIT = 30
+
 type problem struct {
-	question string
-	answer   string
+	question, answer string
 }
 
 type scoreboard struct {
-	total   int64
-	correct int64
+	total, correct int64
 }
 
 var us scoreboard
-
 var quiz []problem
 
 func main() {
-	fn := flag.String("csv", "problems.csv", "the quiz file as a csv")
-	//time := flag.Int("timeout", 30, "total time to finish the quiz, in seconds")
+	fn := flag.String("csv", DEFAULT_FILENAME, "the quiz file as a csv")
+	limit := flag.Int("limit", DEFAULT_LIMIT, "total time to finish the quiz, in seconds")
 	flag.Parse()
 
 	lines := readFile(fn)
 	buildQuiz(lines)
 
-	for i, q := range quiz {
-		fmt.Printf("Question #%d: \n", (i + 1))
+	timer := time.NewTimer(time.Duration(*limit) * time.Second)
+	answerChan := make(chan string)
 
-		handleQuestion(q)
+	for i, p := range quiz {
+		handleQuestion(i, p, answerChan)
+
+		select { // lets a goroutine wait on communication operations.
+		case <-timer.C:
+			fmt.Println("\nTime's up")
+			printScore()
+			return
+		case answer := <-answerChan:
+			handleAnswer(answer, p.answer)
+		}
+
 	}
 
 	printScore()
-
 }
 
 func readFile(fn *string) [][]string {
@@ -67,14 +78,18 @@ func buildQuiz(l [][]string) {
 	}
 }
 
-func handleQuestion(p problem) {
+func handleQuestion(i int, p problem, answerChan chan string) {
+	fmt.Printf("Question #%d: \n", (i + 1))
 	fmt.Printf("%s = ?\n", p.question)
+	go func() {
+		answer := ""
+		fmt.Scanf("%s\n", &answer)
+		answerChan <- answer
+	}()
+}
 
-	answer := ""
-
-	fmt.Scanf("%s\n", &answer)
-
-	if answer == p.answer {
+func handleAnswer(userAnswer string, correctAnswer string) {
+	if userAnswer == correctAnswer {
 		us.correct++
 		fmt.Println("CORRECT!")
 	} else {
