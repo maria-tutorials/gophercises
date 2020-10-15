@@ -2,7 +2,7 @@
 
 Small cli program that reads a quiz from a CSV file and then asks the questions to the user, whilst keeping track of responses.
 
-`go run main.go --help`
+`./quiz --help`
 
 ### csv
 the first column is a question and the second column in the same row is the answer to that question.
