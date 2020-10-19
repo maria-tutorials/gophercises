@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -27,10 +28,15 @@ var quiz []problem
 func main() {
 	fn := flag.String("csv", DEFAULT_FILENAME, "the quiz file as a csv")
 	limit := flag.Int("limit", DEFAULT_LIMIT, "total time to finish the quiz, in seconds")
+	shuffle := flag.Bool("shuffle", false, "randomize the questions or present them in order")
 	flag.Parse()
 
 	lines := readFile(fn)
 	buildQuiz(lines)
+
+	if *shuffle {
+		shuffleQuiz()
+	}
 
 	timer := time.NewTimer(time.Duration(*limit) * time.Second)
 	answerChan := make(chan string)
@@ -64,6 +70,10 @@ func readFile(fn *string) [][]string {
 		exit(fmt.Sprintf("Failed to read the file: %s", *fn), err)
 	}
 
+	if len(lines) == 0 {
+		exit(fmt.Sprintf("There are no questions the file: %s", *fn), nil)
+	}
+
 	return lines
 }
 
@@ -72,9 +82,19 @@ func buildQuiz(l [][]string) {
 	for _, line := range l {
 		p := problem{
 			question: line[0],
-			answer:   strings.TrimSpace(line[1]),
+			answer:   cleanStrings(line[1]),
 		}
 		quiz = append(quiz, p)
+	}
+}
+
+func shuffleQuiz() {
+	r := rand.New(rand.NewSource(time.Now().Unix()))
+
+	for i := range quiz {
+		newpos := r.Intn(len(quiz) - 1)
+
+		quiz[i], quiz[newpos] = quiz[newpos], quiz[i]
 	}
 }
 
@@ -89,7 +109,7 @@ func handleQuestion(i int, p problem, answerChan chan string) {
 }
 
 func handleAnswer(userAnswer string, correctAnswer string) {
-	if userAnswer == correctAnswer {
+	if cleanStrings(userAnswer) == correctAnswer {
 		us.correct++
 		fmt.Println("CORRECT!")
 	} else {
@@ -116,6 +136,12 @@ func printScore() {
 		fmt.Println("Fantastic job :D")
 	}
 
+}
+
+func cleanStrings(s string) string {
+	s = strings.TrimSpace(s)
+	s = strings.ToLower(s)
+	return s
 }
 
 func exit(msg string, err error) {
