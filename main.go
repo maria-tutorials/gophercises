@@ -1,9 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 )
+
+const DEFAULT_FILENAME = "paths.yml"
 
 func main() {
 	mux := defaultMux()
@@ -15,18 +18,13 @@ func main() {
 	}
 	mapHandler := MapHandler(pathsToUrls, mux)
 
-	// Build the YAMLHandler using the mapHandler as the
-	// fallback
-	yaml := `
-- path: "/urlshort"
-  url: https://github.com/gophercises/urlshort
-- path: "/alsomaria"
-  url: https://mariainesserra.com
-`
-	yamlHandler, err := YAMLHandler([]byte(yaml), mapHandler)
+	fn := flag.String("yaml", DEFAULT_FILENAME, "the paths file!")
+
+	yamlHandler, err := YAMLHandler(fn, mapHandler)
 	if err != nil {
 		panic(err)
 	}
+
 	fmt.Println("Starting the server on :8080")
 	http.ListenAndServe(":8080", yamlHandler)
 }

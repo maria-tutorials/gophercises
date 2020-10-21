@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"net/http"
 
 	"gopkg.in/yaml.v2"
@@ -43,8 +44,8 @@ func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.Handl
 // invalid YAML data.
 //
 // Re-using mapHandler because it already does the logic there
-func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
-	pu, err := parseYaml(yml)
+func YAMLHandler(fn *string, fallback http.Handler) (http.HandlerFunc, error) {
+	pu, err := parseYaml(fn)
 	if err != nil {
 		return nil, err
 	}
@@ -54,9 +55,14 @@ func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
 	return MapHandler(pathsToUrls, fallback), nil
 }
 
-func parseYaml(data []byte) ([]pathURL, error) {
+func parseYaml(fn *string) ([]pathURL, error) {
+	yamlFile, err := ioutil.ReadFile(*fn)
+	if err != nil {
+		panic(err)
+	}
+
 	pu := []pathURL{}
-	err := yaml.Unmarshal(data, &pu)
+	err = yaml.Unmarshal(yamlFile, &pu)
 	if err != nil {
 		return nil, err
 	}
@@ -69,4 +75,8 @@ func buildMap(pu []pathURL) map[string]string {
 		pathsToUrls[p.Path] = p.URL
 	}
 	return pathsToUrls
+}
+
+func JSONHandler() {
+	//	pathsToUrls := buildMap(pu)
 }
