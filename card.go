@@ -2,7 +2,10 @@
 
 package deck
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 const (
 	Red   string = "Red"
@@ -58,7 +61,7 @@ func (c Card) String() string {
 
 type Deck []Card
 
-func New() Deck {
+func New(opts ...func(Deck) Deck) Deck {
 	d := Deck{}
 
 	for suit := 0; suit < 4; suit++ {
@@ -66,5 +69,27 @@ func New() Deck {
 			d = append(d, Card{Suit: Suit(suit), Rank: rank})
 		}
 	}
+
+	for _, opt := range opts {
+		d = opt(d)
+	}
+
 	return d
 }
+
+func absCardRank(c Card) int {
+	return int(c.Suit) * int(maxRank) * int(c.Rank)
+}
+
+func DefaultSort(d Deck) Deck {
+	//sort.Sort(ByRank(d))
+	sort.Slice(d, ByRank(d).Less)
+	return d
+}
+
+// ByRank using sort magic
+type ByRank Deck
+
+func (a ByRank) Len() int           { return len(a) }
+func (a ByRank) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByRank) Less(i, j int) bool { return absCardRank(a[i]) < absCardRank(a[j]) }

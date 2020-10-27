@@ -20,7 +20,17 @@ func ExampleCard() {
 
 func TestNew(t *testing.T) {
 	cards := New()
+	fmt.Println(cards)
 	if len(cards) != 13*4 {
 		t.Error("Wrong number of cards in the deck")
+	}
+}
+
+func TestDefaultSort(t *testing.T) {
+	d := New(DefaultSort)
+	c := Card{Rank: Ace, Suit: Spade}
+
+	if d[0] != c {
+		t.Error("Expected Ace of Spades. Received", d[0])
 	}
 }
