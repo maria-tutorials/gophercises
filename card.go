@@ -4,7 +4,9 @@ package deck
 
 import (
 	"fmt"
+	"math/rand"
 	"sort"
+	"time"
 )
 
 const (
@@ -93,3 +95,28 @@ type ByRank Deck
 func (a ByRank) Len() int           { return len(a) }
 func (a ByRank) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByRank) Less(i, j int) bool { return absCardRank(a[i]) < absCardRank(a[j]) }
+
+func Shuffle1(d Deck) Deck {
+	now := time.Now().UnixNano()
+	seed := rand.NewSource(now)
+	r := rand.New(seed)
+
+	for i := range d {
+		newpos := r.Intn(len(d) - 1)
+
+		d[i], d[newpos] = d[newpos], d[i] //weird-magic swap
+	}
+
+	return d
+}
+
+func Shuffle2(d Deck) Deck {
+	s := make(Deck, len(d))
+	r := rand.New(rand.NewSource(time.Now().Unix()))
+	perm := r.Perm(len(d))
+
+	for i, j := range perm {
+		s[i] = d[j]
+	}
+	return s
+}
