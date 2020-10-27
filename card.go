@@ -133,3 +133,16 @@ func Jokers(n int) func(Deck) Deck {
 		return d
 	}
 }
+
+func Filter(f func(c Card) bool) func(Deck) Deck {
+	return func(d Deck) Deck {
+		ret := Deck{}
+
+		for _, c := range d {
+			if !f(c) {
+				ret = append(ret, c)
+			}
+		}
+		return ret
+	}
+}

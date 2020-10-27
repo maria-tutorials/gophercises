@@ -53,3 +53,18 @@ func TestJokers(t *testing.T) {
 	}
 
 }
+
+func TestFiler(t *testing.T) {
+	filter := func(c Card) bool {
+		return c.Rank == Two || c.Rank == Three
+	}
+
+	d := New(Filter(filter))
+
+	for _, c := range d {
+		if c.Rank == Two || c.Rank == Three {
+			t.Error("Found some Twos and Threes")
+		}
+	}
+
+}
