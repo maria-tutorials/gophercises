@@ -36,7 +36,6 @@ func TestDefaultSort(t *testing.T) {
 }
 
 func TestJokers(t *testing.T) {
-
 	numJokers := 3
 
 	deck := New(Jokers(numJokers))
@@ -51,7 +50,6 @@ func TestJokers(t *testing.T) {
 	if n != numJokers {
 		t.Error("Expected", numJokers, "Jokers. Received", n)
 	}
-
 }
 
 func TestFiler(t *testing.T) {
@@ -67,4 +65,12 @@ func TestFiler(t *testing.T) {
 		}
 	}
 
+}
+
+func TestDeck(t *testing.T) {
+	d := New(NumberDecks(3))
+
+	if len(d) != 13*4*3 {
+		t.Errorf("Expected %d cards, received %d", 13*4*3, len(d))
+	}
 }

@@ -146,3 +146,13 @@ func Filter(f func(c Card) bool) func(Deck) Deck {
 		return ret
 	}
 }
+
+func NumberDecks(n int) func(Deck) Deck {
+	return func(d Deck) Deck {
+		ret := Deck{}
+		for i := 0; i < n; i++ {
+			ret = append(ret, d...)
+		}
+		return ret
+	}
+}
