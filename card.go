@@ -120,3 +120,16 @@ func Shuffle2(d Deck) Deck {
 	}
 	return s
 }
+
+//New(Jokers(3))
+func Jokers(n int) func(Deck) Deck {
+	return func(d Deck) Deck {
+		for i := 0; i < n; i++ {
+			d = append(d, Card{
+				Rank: Rank(i),
+				Suit: Joker,
+			})
+		}
+		return d
+	}
+}
