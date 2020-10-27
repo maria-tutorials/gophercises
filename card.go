@@ -38,6 +38,11 @@ const (
 	King
 )
 
+const (
+	minRank = Ace
+	maxRank = King
+)
+
 type Card struct {
 	Suit
 	Color string
@@ -49,4 +54,17 @@ func (c Card) String() string {
 		return c.Suit.String() //Jokers have no extras
 	}
 	return fmt.Sprintf("%s of %ss", c.Rank.String(), c.Suit.String())
+}
+
+type Deck []Card
+
+func New() Deck {
+	d := Deck{}
+
+	for suit := 0; suit < 4; suit++ {
+		for rank := minRank; rank <= maxRank; rank++ {
+			d = append(d, Card{Suit: Suit(suit), Rank: rank})
+		}
+	}
+	return d
 }
